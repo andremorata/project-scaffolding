@@ -41,6 +41,112 @@ Before doing any Phase 0 implementation work, ask the user about each of the fol
 
 Document all responses in `specs/` — the project plan and the Phase 0 issue file — before writing any source code or infrastructure files. This ensures all subsequent agents and contributors start from a known, agreed baseline.
 
+## Pre-Code Readiness Gate
+
+**This gate is mandatory and non-negotiable. No source code, infrastructure code, migration scripts, or scaffolding may be produced until every condition below is verified and explicitly acknowledged in the conversation.**
+
+If a coding task is requested and the gate is not cleared, the agent MUST stop, list the missing items, and refuse to proceed until they are resolved. There is no implicit pass — silence or partial answers do not satisfy the gate.
+
+### What "Coding" Means
+
+The following are blocked until the gate is cleared:
+
+- Creating source files (`.ts`, `.py`, `.go`, `.cs`, `.java`, `.rb`, `.rs`, etc.)
+- Creating infrastructure-as-code files (Bicep, Terraform, Pulumi, CloudFormation)
+- Running code generators, `init` commands, or scaffolding tools that produce source files
+- Writing database migration or seed scripts
+- Creating `Dockerfile`, `docker-compose.yml`, or container configuration files
+- Scaffolding project directories (`src/`, `backend/`, `frontend/`, `infra/`, `app/`, etc.)
+
+Documentation edits, `specs/` updates, and `docs/` file creation are always permitted and never blocked.
+
+### Readiness Checklist
+
+Before writing any code, the agent MUST open and verify each item below. A checkmark is only valid when the content is project-specific — template text, TBD, blank fields, and placeholder values do not count as complete.
+
+#### 1. Project Identity — project plan file in `specs/`
+- [ ] Project name is set (not a template placeholder)
+- [ ] Problem statement is written
+- [ ] Primary users are identified
+- [ ] Success definition is recorded
+- [ ] Delivery constraints are noted
+
+#### 2. Tech Stack — project plan file in `specs/`
+- [ ] Every stack layer has a confirmed choice (no TBD remaining)
+- [ ] Package manager is specified
+- [ ] Authentication approach is documented
+- [ ] Database engine is confirmed
+- [ ] Background job strategy is defined (or explicitly marked as none)
+
+#### 3. Architecture — `docs/01-architecture.md`
+- [ ] Contains project-specific content (not the scaffold template)
+- [ ] Service boundaries are described
+- [ ] Primary data flows are outlined
+- [ ] Key architectural decisions are recorded
+
+#### 4. Database Design — `docs/02-database.md`
+- [ ] Contains project-specific content (not the scaffold template)
+- [ ] Core entities and their relationships are described
+- [ ] Persistence strategy is confirmed
+
+#### 5. API Design — `docs/03-api-design.md`
+- [ ] Contains project-specific content (not the scaffold template)
+- [ ] At minimum, the primary resource groups or endpoint categories are defined
+- [ ] Authentication and authorization approach for the API is documented
+
+#### 6. Business Rules — `docs/05-business-rules.md`
+- [ ] Core domain rules are written down, not left as template text
+- [ ] Any explicit constraints or invariants are captured
+
+#### 7. Infrastructure Target — `docs/06-infrastructure.md`
+- [ ] Cloud provider is confirmed
+- [ ] IaC tool is confirmed
+- [ ] Hosting model is confirmed (containers, serverless, PaaS, VMs)
+- [ ] Environment strategy (dev / staging / prod) is described
+
+#### 8. Phase and Progress Tracking — `specs/`
+- [ ] A concrete phase issue file exists for the active phase (not just the template)
+- [ ] Acceptance criteria for the active phase are written
+- [ ] `progress.status.md` has the active phase and current status filled in
+
+#### 9. Template Files Replaced — `specs/`
+- [ ] `project-template.plan.md` has been renamed to a project-specific name (e.g., `my-project.plan.md`) — the file named `project-template.plan.md` must not exist
+- [ ] `phase-template.issue.md` has been renamed or replaced by at least one concrete phase issue file (e.g., `phase0.issue.md`) — the file named `phase-template.issue.md` must not be the only phase file
+- [ ] Both renamed files contain project-specific content, not scaffold boilerplate
+
+> **Why this matters:** the presence of template-named files (`project-template.plan.md`, `phase-template.issue.md`) is a reliable signal that planning has not been completed. The gate treats these filenames as proof of incomplete readiness.
+
+### Enforcement Protocol
+
+When the agent receives any coding task:
+
+1. Open the project plan file in `specs/` and scan for TBD, blank, or placeholder values.
+2. Open `progress.status.md` and confirm the active phase is set.
+3. Open the relevant `docs/` files and verify they contain project-specific content.
+4. **Check for template file names** — if `specs/project-template.plan.md` still exists with that exact name, or if no concrete phase issue file exists beyond `phase-template.issue.md`, the gate fails immediately.
+5. **If any item in the checklist is not satisfied:**
+   - Stop immediately. Do not write any code, create any files, or run any generators.
+   - State clearly which items are incomplete, referencing the exact file and section.
+   - Offer to help rename and populate the template files if the user is ready to proceed with planning.
+   - Do not proceed until the user has resolved the gaps or explicitly invoked the override below.
+6. **If all items are satisfied:**
+   - State that the Pre-Code Readiness Gate is cleared.
+   - Proceed with the coding task.
+
+### Gate Override
+
+The user may explicitly override this gate by stating one of the following phrases verbatim:
+
+> *"I acknowledge the documentation is incomplete and want to proceed anyway."*
+> *"Override the readiness gate."*
+
+When overridden:
+
+- Record the override as a risk item in `progress.status.md` immediately.
+- Note which checklist items were skipped.
+- Proceed with the task, but treat any generated code as provisional — it may need to be revised once documentation is finalized.
+- Do not silently accept partial information as complete on future tasks. The override applies only to the current request.
+
 ## Preferred Workflow
 
 1. Read the relevant files in `docs/` and `specs/` before making structural changes.
